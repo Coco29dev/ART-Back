@@ -4,8 +4,8 @@ const tableauController = require('../../controllers/tableauController');
 
 router.post('/', tableauController.createTableau);
 router.get('/', tableauController.getAllTableau);
-router.get('/:id', tableauController.getTableauId);
 router.get('/random', tableauController.getRandomTableau);
+router.get('/:id', tableauController.getTableauId);
 router.put('/:id', tableauController.updateTableau);
 router.delete('/:id', tableauController.deleteTableau);
 
