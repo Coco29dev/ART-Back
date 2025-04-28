@@ -4,7 +4,7 @@ const Tableau = require('../models/tableau');
 exports.createTableau = async (req, res) => {
   try {
     const { url, title, content } = req.body;
-    if (!url, !title, !content) {
+    if (!url || !title || !content) {
       return res.status(400).json({ message: 'Contenu manquant' });
     }
     const tableauExistant = await Tableau.findOne({
@@ -43,33 +43,19 @@ exports.getTableauId = async (req, res) => {
   };
 };
 
-let lastServedUuid = null;
 
 exports.getRandomTableau = async (req, res) => {
   try {
     const tableauCount = await Tableau.count();
+
     if (tableauCount === 0) {
-      return res.status(404).json({ message: 'Aucun tableau trouvé' });
+      return res.status(404).json({ message: 'Aucun tableau trouvé ' });
     }
 
-    // Si on n'a qu'un seul tableau, pas le choix que de le renvoyer
-    if (tableauCount === 1) {
-      const tableau = await Tableau.findOne();
-      return res.status(200).json(tableau);
-    }
+    const tableaux = await Tableau.findAll();
+    const indexRandom = Math.floor(Math.random() * tableaux.length);
 
-    // Sinon, on récupère un tableau différent du dernier
-    let tableauRandom;
-    do {
-      tableauRandom = await Tableau.findOne({
-        order: Tableau.sequelize.random()
-      });
-    } while (tableauRandom.uuid === lastServedUuid && tableauCount > 1);
-
-    // On mémorise le dernier UUID servi
-    lastServedUuid = tableauRandom.uuid;
-
-    return res.status(200).json(tableauRandom);
+    return res.status(200).json(tableaux[indexRandom]);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -90,7 +76,7 @@ exports.updateTableau = async (req, res) => {
     if (!tableau) {
       return res.status(404).json({ message: 'Tableau introuvable' });
     }
-    return res.status(200).json(tableau);
+    return res.status(200).json({ message: 'Tableau modifié', tableau });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   };
@@ -104,7 +90,7 @@ exports.deleteTableau = async (req, res) => {
       }
     });
     if (!tableau) {
-      res.status(404).json({ message: 'Tableau introuvable ' })
+      return res.status(404).json({ message: 'Tableau introuvable ' })
     };
     return res.status(200).json({ message: 'Tableau supprimé' })
   } catch (error) {
